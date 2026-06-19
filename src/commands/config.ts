@@ -12,7 +12,7 @@ const configCommand = createCommand({
   data: new SlashCommandBuilder()
     .setName("config")
     .setDescription("Configure bot settings")
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .addSubcommand((sub) =>
       sub
         .setName("honeypot-channel")
