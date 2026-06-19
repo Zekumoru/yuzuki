@@ -12,9 +12,6 @@ import createEvent from "./create-event.js";
 import { logger } from "../utils/logger.js";
 import Guild from "../db/guild.js";
 
-// TODO: Create db persistence for custom timeout
-const TIMEOUT_DURATION = 60 * 60 * 1000; // 1 hour
-
 const messageCreateEvent = createEvent({
   name: Events.MessageCreate,
   execute: async (message) => {
@@ -29,11 +26,12 @@ const messageCreateEvent = createEvent({
     if (!member || !guild) return;
 
     try {
-      await member.timeout(TIMEOUT_DURATION, "Caught by honeypot channel.");
+      const timeoutDuration = guildConfig.timeoutDuration ?? 60 * 60 * 1000; // default is 1 hr
+      await member.timeout(timeoutDuration, "Caught by honeypot channel.");
       logger.info(`Timed out ${member.user.tag} (${member.id})`);
 
       // Delete their messages from the past hour across all channels
-      const oneHourAgo = Date.now() - TIMEOUT_DURATION;
+      const cutoff = Date.now() - timeoutDuration;
       const channels = guild.channels.cache.filter(
         (ch) => ch.isTextBased() && member.permissionsIn(ch),
       );
@@ -44,7 +42,7 @@ const messageCreateEvent = createEvent({
           const messages = await textChannel.messages.fetch({ limit: 100 });
           const userMessages = messages.filter(
             (msg) =>
-              msg.author.id === member.id && msg.createdTimestamp >= oneHourAgo,
+              msg.author.id === member.id && msg.createdTimestamp >= cutoff,
           );
 
           if (userMessages.size > 0) {

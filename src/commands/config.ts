@@ -39,6 +39,21 @@ const configCommand = createCommand({
     )
     .addSubcommand((sub) =>
       sub
+        .setName("timeout-duration")
+        .setDescription(
+          "Set the timeout duration in minutes. If not set, default is 60.",
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("minutes")
+            .setDescription("Duration in minutes (max 40320 = 28 days).")
+            .setMinValue(1)
+            .setMaxValue(40320)
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName("reset")
         .setDescription("Reset the honeypot and report channel settings."),
     ),
@@ -49,10 +64,25 @@ const configCommand = createCommand({
       await Guild.findByIdAndUpdate(interaction.guildId, {
         honeypotChannelId: null,
         reportChannelId: null,
+        timeoutDuration: null,
       });
       await interaction.reply(
         "Honeypot and report channel settings have been reset.",
       );
+      return;
+    }
+
+    if (subcommand === "timeout-duration") {
+      const minutes = interaction.options.getInteger("minutes", true);
+      await Guild.findByIdAndUpdate(
+        interaction.guildId,
+        { timeoutDuration: minutes * 60 * 1000 },
+        { upsert: true },
+      );
+      await interaction.reply({
+        content: `Timeout duration set to ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
