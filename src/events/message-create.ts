@@ -1,4 +1,7 @@
 import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   channelMention,
   EmbedBuilder,
   Events,
@@ -77,10 +80,33 @@ const messageCreateEvent = createEvent({
             name: "Channel",
             value: channelMention(message.channel.id),
           },
+          {
+            name: "Note",
+            value:
+              "All messages of this user in the past hour have been automatically deleted. To ban this user, please do so manually. The bot does not have ban permissions.",
+          },
+          {
+            name: "Status",
+            value: "Pending review",
+          },
         )
         .setTimestamp();
 
-      await (reportChannel as TextChannel).send({ embeds: [embed] });
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`honeypot:untimeout:${member.id}`)
+          .setLabel("Untimeout")
+          .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+          .setCustomId(`honeypot:dismiss:${member.id}`)
+          .setLabel("Dismiss")
+          .setStyle(ButtonStyle.Secondary),
+      );
+
+      await (reportChannel as TextChannel).send({
+        embeds: [embed],
+        components: [row],
+      });
       logger.info(`Report sent for ${member.user.tag} (${member.user.id})`);
     } catch (error) {
       logger.error(
