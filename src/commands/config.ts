@@ -1,0 +1,58 @@
+import {
+  channelMention,
+  ChannelType,
+  MessageFlags,
+  SlashCommandBuilder,
+} from "discord.js";
+import createCommand from "./create-command.js";
+import Guild from "../db/guild.js";
+
+const configCommand = createCommand({
+  data: new SlashCommandBuilder()
+    .setName("config")
+    .setDescription("Configure bot settings")
+    .addSubcommand((sub) =>
+      sub
+        .setName("honeypot-channel")
+        .setDescription("Set the honeypot channel")
+        .addChannelOption((option) =>
+          option
+            .setName("channel")
+            .setDescription("The channel to use as a honeypot.")
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName("report-channel")
+        .setDescription("Set the report channel")
+        .addChannelOption((option) =>
+          option
+            .setName("channel")
+            .setDescription("The channel to send reports to.")
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true),
+        ),
+    ),
+  execute: async (interaction) => {
+    const subcommand = interaction.options.getSubcommand();
+    const channel = interaction.options.getChannel("channel", true);
+
+    const update =
+      subcommand === "honeypot-channel"
+        ? { honeypotChannelId: channel.id }
+        : { reportChannelId: channel.id };
+
+    await Guild.findByIdAndUpdate(interaction.guildId, update, {
+      upsert: true,
+    });
+
+    await interaction.reply({
+      content: `${subcommand === "honeypot-channel" ? "Honeypot" : "Report"} channel set to ${channelMention(channel.id)}`,
+      flags: MessageFlags.Ephemeral,
+    });
+  },
+});
+
+export default configCommand;

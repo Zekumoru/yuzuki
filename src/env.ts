@@ -7,8 +7,7 @@ const EnvSchema = z.object({
   CLIENT_ID: z.string().min(1),
   DISCORD_TOKEN: z.string().min(1),
   DEV_GUILD_ID: z.string().min(1),
-  HONEYPOT_CHANNEL_ID: z.string().min(1),
-  REPORT_CHANNEL_ID: z.string().min(1),
+  MONGODB_URI: z.string().min(1),
 });
 
 export const env = EnvSchema.parse(process.env);

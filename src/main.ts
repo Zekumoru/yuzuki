@@ -5,6 +5,7 @@ import { logger } from "./utils/logger.js";
 import loadCommands from "./commands/load-commands.js";
 import loadEvents from "./events/load-events.js";
 import registerCommands from "./commands/register-commands.js";
+import connect from "./db/connect.js";
 
 // To use args in dev, run: nx serve zekuru --args="-r"
 const toRegister = argv.some(
@@ -35,10 +36,17 @@ for (const [, event] of await loadEvents()) {
   logger.info(`Loaded event: ${event.name}`);
 }
 
-const login = () => client.login(env.DISCORD_TOKEN);
+const start = async () => {
+  try {
+    await connect();
+    await client.login(env.DISCORD_TOKEN);
+  } catch (error) {
+    logger.error(error, "Failed to start app");
+  }
+};
 
 if (toRegister) {
-  registerCommands().then(login);
+  registerCommands().then(start);
 } else {
-  login();
+  start();
 }

@@ -9,8 +9,8 @@ import {
   userMention,
 } from "discord.js";
 import createEvent from "./create-event.js";
-import { env } from "../env.js";
 import { logger } from "../utils/logger.js";
+import Guild from "../db/guild.js";
 
 // TODO: Create db persistence for custom timeout
 const TIMEOUT_DURATION = 60 * 60 * 1000; // 1 hour
@@ -19,7 +19,11 @@ const messageCreateEvent = createEvent({
   name: Events.MessageCreate,
   execute: async (message) => {
     if (message.author.bot) return;
-    if (message.channel.id !== env.HONEYPOT_CHANNEL_ID) return;
+    if (!message.guild) return;
+
+    const guildConfig = await Guild.findById(message.guild.id);
+    if (!guildConfig?.honeypotChannelId || !guildConfig.reportChannelId) return;
+    if (message.channel.id !== guildConfig.honeypotChannelId) return;
 
     const { member, guild } = message;
     if (!member || !guild) return;
@@ -57,7 +61,9 @@ const messageCreateEvent = createEvent({
       }
 
       // Send report embed
-      const reportChannel = guild.channels.cache.get(env.REPORT_CHANNEL_ID);
+      const reportChannel = guild.channels.cache.get(
+        guildConfig.reportChannelId,
+      );
       if (!reportChannel?.isTextBased()) {
         logger.warn("Report channel not found or not text-based.");
         return;
