@@ -1,4 +1,12 @@
-import { Events, MessageFlags, type InteractionReplyOptions } from "discord.js";
+import {
+  Collection,
+  Events,
+  inlineCode,
+  MessageFlags,
+  time,
+  TimestampStyles,
+  type InteractionReplyOptions,
+} from "discord.js";
 import createEvent from "./create-event.js";
 import { logger } from "../utils/logger.js";
 
@@ -14,6 +22,35 @@ const interactionCreateEvent = createEvent({
           `No command matching ${interaction.commandName} was found.`,
         );
       }
+
+      // Cooldown check
+      const defaultCooldown = 1; // seconds
+      const cooldownAmount = (command.cooldown ?? defaultCooldown) * 1000;
+      const { cooldowns } = interaction.client;
+
+      if (!cooldowns.has(command.data.name)) {
+        cooldowns.set(command.data.name, new Collection());
+      }
+
+      const timestamps = cooldowns.get(command.data.name)!;
+      const now = Date.now();
+
+      if (timestamps.has(interaction.user.id)) {
+        const expirationTime =
+          timestamps.get(interaction.user.id)! + cooldownAmount;
+
+        if (now < expirationTime) {
+          const expiredTimestamp = Math.round(expirationTime / 1000);
+          await interaction.reply({
+            content: `Please wait, you are on a cooldown. You can use ${inlineCode(command.data.name)} again in ${time(expiredTimestamp, TimestampStyles.RelativeTime)}`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+      }
+
+      timestamps.set(interaction.user.id, now);
+      setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
       await command.execute(interaction);
     } catch (error) {
