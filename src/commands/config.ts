@@ -36,9 +36,26 @@ const configCommand = createCommand({
             .addChannelTypes(ChannelType.GuildText)
             .setRequired(true),
         ),
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName("reset")
+        .setDescription("Reset the honeypot and report channel settings."),
     ),
   execute: async (interaction) => {
     const subcommand = interaction.options.getSubcommand();
+
+    if (subcommand === "reset") {
+      await Guild.findByIdAndUpdate(interaction.guildId, {
+        honeypotChannelId: null,
+        reportChannelId: null,
+      });
+      await interaction.reply(
+        "Honeypot and report channel settings have been reset.",
+      );
+      return;
+    }
+
     const channel = interaction.options.getChannel("channel", true);
 
     const update =
@@ -51,7 +68,7 @@ const configCommand = createCommand({
     });
 
     await interaction.reply({
-      content: `${subcommand === "honeypot-channel" ? "Honeypot" : "Report"} channel set to ${channelMention(channel.id)}`,
+      content: `${subcommand === "honeypot-channel" ? "Honeypot" : "Report"} channel set to ${channelMention(channel.id)}.`,
       flags: MessageFlags.Ephemeral,
     });
   },
