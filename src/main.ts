@@ -11,7 +11,13 @@ const toRegister = argv.some(
   (option) => option === "--register" || option === "-r",
 );
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages, // for receiving messageCreate events
+    GatewayIntentBits.MessageContent, // used for reading the actual message (for review)
+  ],
+});
 
 client.commands = new Collection();
 client.cooldowns = new Collection();
