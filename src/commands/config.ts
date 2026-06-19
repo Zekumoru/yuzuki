@@ -2,6 +2,7 @@ import {
   channelMention,
   ChannelType,
   MessageFlags,
+  PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
 import createCommand from "./create-command.js";
@@ -11,6 +12,7 @@ const configCommand = createCommand({
   data: new SlashCommandBuilder()
     .setName("config")
     .setDescription("Configure bot settings")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addSubcommand((sub) =>
       sub
         .setName("honeypot-channel")
