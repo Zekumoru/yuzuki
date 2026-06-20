@@ -36,27 +36,29 @@ const messageCreateEvent = createEvent({
         (ch) => ch.isTextBased() && member.permissionsIn(ch),
       );
 
-      for (const [, channel] of channels) {
-        try {
-          const textChannel = channel as TextChannel;
-          const messages = await textChannel.messages.fetch({ limit: 100 });
-          const userMessages = messages.filter(
-            (msg) =>
-              msg.author.id === member.id && msg.createdTimestamp >= cutoff,
-          );
+      await Promise.all(
+        channels.map(async (channel) => {
+          try {
+            const textChannel = channel as TextChannel;
+            const messages = await textChannel.messages.fetch({ limit: 100 });
+            const userMessages = messages.filter(
+              (msg) =>
+                msg.author.id === member.id && msg.createdTimestamp >= cutoff,
+            );
 
-          if (userMessages.size > 0) {
-            await textChannel.bulkDelete(userMessages);
+            if (userMessages.size > 0) {
+              await textChannel.bulkDelete(userMessages);
+            }
+          } catch {
+            // The `?` denotes the fact that the channels filtered should be the
+            // channels that the spammer can access, thus, if this is logged,
+            // then there might be some weird error.
+            logger.warn(
+              `Channel skipped, possibly lacking access(?), for checking messages to delete: ${channel.name} (${channel.id})`,
+            );
           }
-        } catch {
-          // The `?` denotes the fact that the channels filtered should be the
-          // channels that the spammer can access, thus, if this is logged,
-          // then there might be some weird error.
-          logger.warn(
-            `Channel skipped, possibly lacking access(?), for checking messages to delete: ${channel.name} (${channel.id})`,
-          );
-        }
-      }
+        }),
+      );
 
       // Send report embed
       const reportChannel = guild.channels.cache.get(
