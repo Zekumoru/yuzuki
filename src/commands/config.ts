@@ -55,7 +55,9 @@ const configCommand = createCommand({
     .addSubcommand((sub) =>
       sub
         .setName("reset")
-        .setDescription("Reset the honeypot and report channel settings."),
+        .setDescription(
+          "Reset the honeypot channel, the report channel, and the timeout duration settings.",
+        ),
     ),
   execute: async (interaction) => {
     const subcommand = interaction.options.getSubcommand();
@@ -67,7 +69,7 @@ const configCommand = createCommand({
         timeoutDuration: null,
       });
       await interaction.reply(
-        "Honeypot and report channel settings have been reset.",
+        "Honeypot channel, report channel, and timeout duration settings have been reset.",
       );
       return;
     }
