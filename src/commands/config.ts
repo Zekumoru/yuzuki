@@ -68,9 +68,11 @@ const configCommand = createCommand({
         reportChannelId: null,
         timeoutDuration: null,
       });
-      await interaction.reply(
-        "Honeypot channel, report channel, and timeout duration settings have been reset.",
-      );
+      await interaction.reply({
+        content:
+          "Honeypot channel, report channel, and timeout duration settings have been reset.",
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
