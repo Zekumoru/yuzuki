@@ -17,6 +17,7 @@ const messageCreateEvent = createEvent({
   execute: async (message) => {
     if (message.author.bot) return;
     if (!message.guild) return;
+    if (message.member?.isCommunicationDisabled()) return;
 
     const guildConfig = await Guild.findById(message.guild.id);
     if (!guildConfig?.honeypotChannelId || !guildConfig.reportChannelId) return;
