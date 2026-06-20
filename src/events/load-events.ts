@@ -5,7 +5,7 @@ import { isDiscordEvent, type AnyDiscordEvent } from "./create-event.js";
 
 // "entry" because the event could be in a file directly or
 // within its own folder with the same name.
-const eventEntryRegex = /^[\w-]*\.ts$/i;
+const eventEntryRegex = /^[\w-]*\.[jt]s$/i;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const eventsFolderPath = path.join(__dirname); // this folder
 
@@ -13,11 +13,14 @@ const eventsFolderPath = path.join(__dirname); // this folder
 // if a folder then grab the file within it with the same
 // folder name.
 const getEventPath = (entry: string): string | undefined => {
-  if (entry.endsWith(".ts")) {
+  if (entry.endsWith(".ts") || entry.endsWith(".js")) {
     return path.join(eventsFolderPath, entry); // is a file
   }
 
-  const eventPath = path.join(eventsFolderPath, entry, `${entry}.ts`);
+  const ext = fs.existsSync(path.join(eventsFolderPath, entry, `${entry}.js`))
+    ? ".js"
+    : ".ts";
+  const eventPath = path.join(eventsFolderPath, entry, `${entry}${ext}`);
 
   // Check if the folder has a file with the same name
   if (!fs.existsSync(eventPath)) return;
