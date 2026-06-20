@@ -5,7 +5,7 @@ const pingCommand = createCommand({
   devOnly: true,
   data: new SlashCommandBuilder()
     .setName("ping")
-    .setDescription("Replies with pong!")
+    .setDescription("Check if the bot is online and view its latency")
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
   execute: async (interaction) => {
     await interaction.reply(
