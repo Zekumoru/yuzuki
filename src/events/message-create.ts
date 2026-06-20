@@ -34,7 +34,7 @@ const messageCreateEvent = createEvent({
 
       // Delete their messages from the past hour across all channels
       const channels = guild.channels.cache.filter(
-        (ch) => ch.isTextBased() && member.permissionsIn(ch),
+        (ch) => ch.isTextBased() && member.permissionsIn(ch).has("ViewChannel"),
       );
 
       await Promise.all(
