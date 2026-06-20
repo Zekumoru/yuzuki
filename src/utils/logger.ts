@@ -5,7 +5,7 @@ const isDev = process.env["NODE_ENV"] !== "production";
 
 const prettyOptions: PrettyOptions = {
   colorize: true,
-  translateTime: "HH:MM:ss.l",
+  translateTime: "yyyy-mm-dd HH:MM:ss.l",
   ignore: "pid,hostname",
 };
 
