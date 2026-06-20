@@ -9,7 +9,7 @@ const pingCommand = createCommand({
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
   execute: async (interaction) => {
     await interaction.reply(
-      `Hi! I'm up and running! Latency: ${interaction.client.ws.ping}`,
+      `Hi! I'm up and running! Latency: ${interaction.client.ws.ping}ms`,
     );
   },
 });
