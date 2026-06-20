@@ -27,11 +27,12 @@ const messageCreateEvent = createEvent({
 
     try {
       const timeoutDuration = guildConfig.timeoutDuration ?? 60 * 60 * 1000; // default is 1 hr
+      const deleteLimit = guildConfig.deleteLimit ?? 20; // default is up to 20 messages
+
       await member.timeout(timeoutDuration, "Caught by honeypot channel.");
       logger.info(`Timed out ${member.user.tag} (${member.id})`);
 
       // Delete their messages from the past hour across all channels
-      const cutoff = Date.now() - timeoutDuration;
       const channels = guild.channels.cache.filter(
         (ch) => ch.isTextBased() && member.permissionsIn(ch),
       );
@@ -40,10 +41,11 @@ const messageCreateEvent = createEvent({
         channels.map(async (channel) => {
           try {
             const textChannel = channel as TextChannel;
-            const messages = await textChannel.messages.fetch({ limit: 100 });
+            const messages = await textChannel.messages.fetch({
+              limit: deleteLimit,
+            });
             const userMessages = messages.filter(
-              (msg) =>
-                msg.author.id === member.id && msg.createdTimestamp >= cutoff,
+              (msg) => msg.author.id === member.id,
             );
 
             if (userMessages.size > 0) {

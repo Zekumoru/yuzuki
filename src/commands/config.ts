@@ -54,10 +54,21 @@ const configCommand = createCommand({
     )
     .addSubcommand((sub) =>
       sub
-        .setName("reset")
+        .setName("delete-limit")
         .setDescription(
-          "Reset the honeypot channel, the report channel, and the timeout duration settings.",
+          "Set the max number of recent messages to check per channel for deletion. If not set, default is 20.",
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("limit")
+            .setDescription("Max limit of messages (max 100).")
+            .setMinValue(1)
+            .setMaxValue(100)
+            .setRequired(true),
         ),
+    )
+    .addSubcommand((sub) =>
+      sub.setName("reset").setDescription("Reset all settings."),
     ),
   execute: async (interaction) => {
     const subcommand = interaction.options.getSubcommand();
@@ -67,10 +78,10 @@ const configCommand = createCommand({
         honeypotChannelId: null,
         reportChannelId: null,
         timeoutDuration: null,
+        deleteLimit: null,
       });
       await interaction.reply({
-        content:
-          "Honeypot channel, report channel, and timeout duration settings have been reset.",
+        content: "All settings have been reset.",
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -85,6 +96,20 @@ const configCommand = createCommand({
       );
       await interaction.reply({
         content: `Timeout duration set to ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    if (subcommand === "delete-limit") {
+      const limit = interaction.options.getInteger("limit", true);
+      await Guild.findByIdAndUpdate(
+        interaction.guildId,
+        { deleteLimit: limit },
+        { upsert: true },
+      );
+      await interaction.reply({
+        content: `Delete limit set to ${limit}.`,
         flags: MessageFlags.Ephemeral,
       });
       return;
