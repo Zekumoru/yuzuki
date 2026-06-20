@@ -3,7 +3,7 @@
 A Discord bot that automatically catches spammers using a honeypot channel. When a user sends a message in the honeypot channel, Yuzuki will:
 
 - Time them out for 1 hour (configurable).
-- Delete their messages within the timeout duration across all accessible channels.
+- Delete their recent messages across all accessible channels.
 - Send a report to a designated channel for moderators to review.
 
 ## Setup
@@ -88,7 +88,11 @@ Before Yuzuki can catch spammers, a moderator needs to configure two channels:
 
    `/config timeout-duration <minutes>`
 
-4. **Reset all settings:**
+4. **Set the delete limit** — max recent messages to check per channel for deletion (default: 20):
+
+   `/config delete-limit <limit>`
+
+5. **Reset all settings:**
 
    `/config reset`
 
