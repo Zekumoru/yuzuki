@@ -10,7 +10,7 @@ A Discord bot that automatically catches spammers using a honeypot channel. When
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or later
+- [Node.js](https://nodejs.org/) v22 or later
 - [pnpm](https://pnpm.io/)
 - [MongoDB](https://www.mongodb.com/)
 
