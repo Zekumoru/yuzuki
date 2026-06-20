@@ -1,4 +1,10 @@
-import { EmbedBuilder, Events, MessageFlags, userMention } from "discord.js";
+import {
+  EmbedBuilder,
+  Events,
+  MessageFlags,
+  PermissionFlagsBits,
+  userMention,
+} from "discord.js";
 import createEvent from "./create-event.js";
 import { logger } from "../utils/logger.js";
 
@@ -11,6 +17,16 @@ const honeypotInteractionEvent = createEvent({
     const [, action, userId] = interaction.customId.split(":");
     const { guild } = interaction;
     if (!guild) return;
+
+    if (
+      !interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)
+    ) {
+      await interaction.reply({
+        content: "You don't have permission to do that.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
 
     switch (action) {
       case "untimeout": {
